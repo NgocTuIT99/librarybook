@@ -2,8 +2,16 @@ import React from "react";
 import Sidebar from "./Sidebar";
 import Home from "./Home";
 import { Row, Col } from "antd";
+import { useNavigate } from "react-router-dom";
 
-export default function Admin() {
+export default function Admin({ checkLogin }) {
+  let navigate = useNavigate();
+  React.useEffect(() => {
+    if (checkLogin === false) {
+      return navigate("/login");
+    }
+  }, [checkLogin]);
+
   return (
     <div>
       <Row>

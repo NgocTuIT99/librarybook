@@ -10,7 +10,7 @@ import { handleLoginService } from "../../service/userService";
 const fbProvider = new FacebookAuthProvider();
 const ggProvider = new GoogleAuthProvider();
 
-export default function Login() {
+export default function Login({ setCheckLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,10 +23,12 @@ export default function Login() {
       if (data.user.providerId === "admin" && data.errCode === 0) {
         setUser(data.user);
         navigate("/admin");
+        setCheckLogin(true);
         return;
       } else if (data && data.errCode === 0) {
         setUser(data.user);
         navigate("/");
+        setCheckLogin(true);
         return;
       }
     }
@@ -38,6 +40,7 @@ export default function Login() {
     try {
       await auth.signInWithPopup(fbProvider);
       navigate("/");
+      setCheckLogin(true);
     } catch (e) {
       setError(e.message);
       console.log(e.message);
@@ -50,6 +53,7 @@ export default function Login() {
     try {
       await auth.signInWithPopup(ggProvider);
       navigate("/");
+      setCheckLogin(true);
     } catch (e) {
       setError(e.message);
       console.log(e.message);
