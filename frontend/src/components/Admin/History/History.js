@@ -52,9 +52,8 @@ const UserManage = () => {
       try {
         const res = await getAllHistoryService();
         setHistories(res.his);
-        console.log(res.his);
         return;
-      } catch (err) {}
+      } catch (err) { }
     };
     return () => {
       getHistories();

@@ -34,7 +34,7 @@ export default function CategoryList() {
       try {
         const res = await getAllCategoryService();
         setCategories(res.cats);
-      } catch (err) {}
+      } catch (err) { }
     };
     return () => {
       getCategories();
@@ -42,7 +42,7 @@ export default function CategoryList() {
   }, [selectedCategory]);
 
   const handleClick = (value) => {
-    setSelectedCategory(value.toString());
+    setSelectedCategory(value);
   };
 
   return (

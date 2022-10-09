@@ -67,7 +67,7 @@ let borrowBook = async (data) => {
         raw: false,
       });
       if (book) {
-        book.amount = book.amount;
+        book.amount = book.amount - 1;
 
         await book.save();
         await db.History.create({
@@ -105,6 +105,19 @@ let returnBook = (data) => {
         resolve({
           errCode: 2,
           message: "Thiếu thông số đầu vào!",
+        });
+      }
+      let book = await db.Book.findOne({
+        where: { id: data.bookId },
+        raw: false,
+      });
+      if (book) {
+        book.amount = book.amount + 1;
+        await book.save();
+      } else {
+        resolve({
+          errCode: 2,
+          message: `Không tìm thấy sách`,
         });
       }
       let his = await db.History.findOne({

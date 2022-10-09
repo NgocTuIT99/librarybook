@@ -1,4 +1,4 @@
-import { Space, Table, Typography, Button, Modal, Input } from "antd";
+import { Space, Table, Typography, Button, Modal, Input, Select } from "antd";
 import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import {
@@ -7,6 +7,9 @@ import {
   editUserService,
   deleteUserService,
 } from "../../../service/userService";
+import validator from 'validator';
+
+const { Option } = Select;
 
 const UserManage = () => {
   const columns = [
@@ -54,7 +57,7 @@ const UserManage = () => {
   const [fullName, setFullName] = useState("");
   const [address, setAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [providerId, setProviderId] = useState("admin");
+  const [providerId, setProviderId] = useState("");
   const tableColumns = columns.map((item) => ({ ...item }));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formName, setFormName] = useState("");
@@ -65,7 +68,7 @@ const UserManage = () => {
       try {
         const res = await getAllUserService();
         setUsers(res.users);
-      } catch (err) {}
+      } catch (err) { }
     };
     return () => {
       getUsers();
@@ -91,6 +94,11 @@ const UserManage = () => {
 
   const handleOk = async () => {
     if (formName === "add") {
+      const checkInput = validateInputAdd();
+      if (checkInput === false) {
+        toast.error("Bạn cần nhập chính xác email, password và tên người dùng")
+        return;
+      }
       const data = await createUserService({
         email: email,
         password: password,
@@ -106,6 +114,11 @@ const UserManage = () => {
       }
     }
     if (formName === "edit") {
+      const checkInput = validateInputEdit();
+      if (checkInput === false) {
+        toast.error("Bạn cần nhập chính xác email và tên người dùng")
+        return;
+      }
       const data = await editUserService({
         id: userId,
         email: email,
@@ -152,6 +165,26 @@ const UserManage = () => {
     setProviderId("admin");
   };
 
+  const validateInputAdd = () => {
+    if (validator.isEmail(email) && password !== "" && fullName !== "") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  const validateInputEdit = () => {
+    if (validator.isEmail(email) && fullName !== "") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  const handleChangeProviderId = (value) => {
+    setProviderId(value);
+  }
+
   return (
     <div style={{ margin: "5px" }}>
       <Typography.Title>Quản lý người dùng</Typography.Title>
@@ -171,7 +204,7 @@ const UserManage = () => {
         {formName === "add" ? (
           <>
             <Typography.Text>Mật khẩu</Typography.Text>
-            <Input
+            <Input.Password
               onChange={(e) => setPassword(e.target.value)}
               value={password}
             />
@@ -196,12 +229,22 @@ const UserManage = () => {
         />
         <br />
         <br />
-        <Typography.Text>Vai trò</Typography.Text>
-        <Input
+        <Typography.Text style={{ marginRight: "10px" }}>Vai trò</Typography.Text>
+        {/* <Input
           value={providerId}
           defaultValue="admin"
           onChange={(e) => setProviderId(e.target.value)}
-        />
+        /> */}
+        <Select
+          defaultValue="admin"
+          style={{
+            width: 120,
+          }}
+          onChange={handleChangeProviderId}
+        >
+          <Option value="admin">Admin</Option>
+          <Option value="user">User</Option>
+        </Select>
       </Modal>
       <Table
         rowKey="Id"

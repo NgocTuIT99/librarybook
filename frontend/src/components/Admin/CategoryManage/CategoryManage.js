@@ -50,7 +50,7 @@ const UserManage = () => {
       try {
         const res = await getAllCategoryService();
         setCategories(res.cats);
-      } catch (err) {}
+      } catch (err) { }
     };
     return () => {
       getCategories();
@@ -71,6 +71,11 @@ const UserManage = () => {
   };
 
   const handleOk = async () => {
+    const checkCategory = checkInput()
+    if (checkCategory === false) {
+      toast.error("Bạn chưa nhập tên thể loại");
+      return;
+    }
     if (formName === "add") {
       const data = await createCategoryService({
         name: name,
@@ -118,6 +123,14 @@ const UserManage = () => {
     setName("");
     setDescription("");
   };
+
+  const checkInput = () => {
+    if (name === "") {
+      return false;
+    } else {
+      return true;
+    }
+  }
 
   return (
     <div style={{ margin: "5px" }}>

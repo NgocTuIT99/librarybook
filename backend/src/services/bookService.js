@@ -1,4 +1,5 @@
 import db from "../models/index";
+import { Op } from "sequelize";
 
 let getAllBook = () => {
   return new Promise(async (resolve, reject) => {
@@ -45,10 +46,14 @@ let getBookByCategory = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
       let user = [];
-      console.log(id);
-      if (id) {
+      if (id != 0) {
         user = await db.Book.findAll({
-          where: { categoryId: id },
+          where: {
+            categoryId: id,
+            amount: {
+              [Op.gt]: 0
+            }
+          },
           include: [
             {
               model: db.Category,
@@ -59,7 +64,12 @@ let getBookByCategory = (id) => {
           nest: true,
         });
       } else {
-        user = await db.User.findAll({
+        user = await db.Book.findAll({
+          where: {
+            amount: {
+              [Op.gt]: 0
+            }
+          },
           include: [
             {
               model: db.Category,

@@ -7,7 +7,7 @@ const UserContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState({});
   const [selectedForm, setSelectedForm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(0);
 
   const logout = () => {
     return signOut(auth);

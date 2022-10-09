@@ -17,16 +17,9 @@ export default function ProductList() {
   useEffect(() => {
     const getBooks = async () => {
       try {
-        let res = await getAllBookService();
-        // console.log(selectedCategory);
-        // let res = {};
-        // if (selectedCategory !== "0" && selectedCategory !== "") {
-        //   res = await getAllBookByCategoryService(Number(selectedCategory));
-        // } else {
-        //   res = await getAllBookService();
-        // }
+        let res = await getAllBookByCategoryService(Number(selectedCategory));
         setBooks(res.books);
-      } catch (err) {}
+      } catch (err) { }
     };
     return () => {
       getBooks();

@@ -11,7 +11,6 @@ import {
 } from "antd";
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import ImgCrop from "antd-img-crop";
 import CommonUtils from "../../../CommonUtils";
 import {
   getAllBookService,
@@ -49,7 +48,7 @@ const UserManage = () => {
     {
       title: "Action",
       key: "action",
-      render: (text, record) => (
+      render: (record) => (
         <Space size="middle">
           <Button type="primary" onClick={() => showModalEdit(record)}>
             Sửa
@@ -102,7 +101,7 @@ const UserManage = () => {
       try {
         const res = await getAllBookService();
         setBooks(res.books);
-      } catch (err) {}
+      } catch (err) { }
     };
     return () => {
       getBooks();
@@ -118,7 +117,7 @@ const UserManage = () => {
       try {
         const res = await getAllCategoryService();
         setCategories(res.cats);
-      } catch (err) {}
+      } catch (err) { }
     };
     return () => {
       getCategories();
@@ -146,6 +145,11 @@ const UserManage = () => {
   };
 
   const handleOk = async () => {
+    const checkInputBook = checkInput();
+    if (checkInputBook === false) {
+      toast.error("Bạn chưa nhập đầy đủ thông tin sách");
+      return;
+    }
     if (formName === "add") {
       const data = await createBookService({
         name: name,
@@ -175,8 +179,8 @@ const UserManage = () => {
         toast.error(data.message);
       }
     }
-    setIsRender(!isRender);
     clearState();
+    setIsRender(!isRender);
     setIsModalOpen(false);
   };
 
@@ -214,6 +218,14 @@ const UserManage = () => {
     setAmount(value);
   };
 
+  const checkInput = () => {
+    if (name === "" || author === "" || categoryId === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   return (
     <div style={{ margin: "5px" }}>
       <Typography.Title>Quản lý sách</Typography.Title>
@@ -242,7 +254,7 @@ const UserManage = () => {
                 width: 120,
               }}
               defaultValue={viewCategoryId}
-              onChange={(value) => handleCategoryChange(value)}
+              onChange={(e) => handleCategoryChange(e)}
             >
               {categories.map((category) => (
                 <Option key={category.id}>{category.name}</Option>
@@ -264,7 +276,7 @@ const UserManage = () => {
             id="previewImg"
             type="file"
             hidden
-            onChange={(event) => handleOnChangeImage(event)}
+            onClick={(event) => handleOnChangeImage(event)}
           />
           <label className="lable-upload" htmlFor="previewImg">
             Tải ảnh <i className="fas fa-upload"></i>

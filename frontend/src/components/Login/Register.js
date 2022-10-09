@@ -3,6 +3,7 @@ import "./index.css";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { createUserService } from "../../service/userService";
+import validator from 'validator';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,15 +11,20 @@ export default function Login() {
   const [username, setUserName] = useState("");
 
   const handleSubmit = async () => {
-    const data = await createUserService({
-      fullName: username,
-      email: email,
-      password: password,
-    });
-    if (data && data.errCode === 0) {
-      toast.success("Sign Up Success !");
-    } else {
-      toast.error(data.message);
+    if (validator.isEmail(email)) {
+      const data = await createUserService({
+        fullName: username,
+        email: email,
+        password: password,
+      });
+      if (data && data.errCode === 0) {
+        toast.success("Sign Up Success !");
+      } else {
+        toast.error(data.message);
+      }
+    }
+    else {
+      toast.error("Email không hợp lệ");
     }
   };
 
