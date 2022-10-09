@@ -10,7 +10,7 @@ const SidebarStyled = styled.div`
   height: 100vh;
 `;
 
-export default function Sidebar() {
+export default function Sidebar({ setSelectedCategory }) {
   return (
     <SidebarStyled>
       <Row>
@@ -18,7 +18,7 @@ export default function Sidebar() {
           <UserInfo />
         </Col>
         <Col span={24}>
-          <CategoryList />
+          <CategoryList setSelectedCategory={setSelectedCategory} />
         </Col>
       </Row>
     </SidebarStyled>

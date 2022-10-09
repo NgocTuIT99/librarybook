@@ -8,22 +8,21 @@ import {
 import { borrowBookService } from "../../../service/historyService";
 import { ToastContainer, toast } from "react-toastify";
 
-export default function ProductList() {
-  const { selectedCategory, setSelectedCategory, user } = UserAuth();
+export default function ProductList({ selectedCategory }) {
+  const { user } = UserAuth();
   const [books, setBooks] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [book, setBook] = useState({});
 
   useEffect(() => {
     const getBooks = async () => {
+      console.log(selectedCategory);
       try {
-        let res = await getAllBookByCategoryService(Number(selectedCategory));
+        let res = await getAllBookByCategoryService(selectedCategory);
         setBooks(res.books);
       } catch (err) { }
     };
-    return () => {
-      getBooks();
-    };
+    getBooks();
   }, [selectedCategory]);
 
   const showModal = (book) => {

@@ -25,9 +25,8 @@ const LinkStyled = styled(Typography.Link)`
   color: white;
 `;
 
-export default function CategoryList() {
+export default function CategoryList({ setSelectedCategory }) {
   const [categories, setCategories] = useState([]);
-  const { selectedCategory, setSelectedCategory } = UserAuth();
 
   useEffect(() => {
     const getCategories = async () => {
@@ -39,7 +38,7 @@ export default function CategoryList() {
     return () => {
       getCategories();
     };
-  }, [selectedCategory]);
+  }, [categories.length]);
 
   const handleClick = (value) => {
     setSelectedCategory(value);
@@ -63,6 +62,6 @@ export default function CategoryList() {
           <></>
         )}
       </PanelStyled>
-    </Collapse>
+    </Collapse >
   );
 }

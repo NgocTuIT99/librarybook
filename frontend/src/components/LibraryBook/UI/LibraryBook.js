@@ -5,14 +5,14 @@ import History from "../History/History";
 import Navbar from "./Navbar";
 import Announcement from "./Announcement";
 
-export default function LibraryBook() {
+export default function LibraryBook({ selectedCategory }) {
   const { selectedForm } = UserAuth();
 
   return (
     <div>
       <Navbar />
       <Announcement />
-      {selectedForm === "1" ? <History /> : <ProductList />}
+      {selectedForm === "1" ? <History /> : <ProductList selectedCategory={selectedCategory} />}
     </div>
   );
 }
