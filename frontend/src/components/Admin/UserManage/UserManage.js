@@ -57,7 +57,7 @@ const UserManage = () => {
   const [fullName, setFullName] = useState("");
   const [address, setAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [providerId, setProviderId] = useState("");
+  const [providerId, setProviderId] = useState("admin");
   const tableColumns = columns.map((item) => ({ ...item }));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formName, setFormName] = useState("");
@@ -230,13 +230,8 @@ const UserManage = () => {
         <br />
         <br />
         <Typography.Text style={{ marginRight: "10px" }}>Vai trò</Typography.Text>
-        {/* <Input
-          value={providerId}
-          defaultValue="admin"
-          onChange={(e) => setProviderId(e.target.value)}
-        /> */}
         <Select
-          defaultValue="admin"
+          value={providerId}
           style={{
             width: 120,
           }}

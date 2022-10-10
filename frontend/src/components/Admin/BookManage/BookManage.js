@@ -76,7 +76,6 @@ const UserManage = () => {
   const [formName, setFormName] = useState("");
   const [isRender, setIsRender] = useState(false);
   const [previewImgURL, setPreviewImgURL] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
 
   const handleOnChangeImage = async (event) => {
     let data = event.target.files;
@@ -87,13 +86,7 @@ const UserManage = () => {
       setPreviewImgURL(objUrl);
       setImage(base64);
     }
-  };
-
-  const openPreviewImage = () => {
-    if (!previewImgURL) {
-      return;
-    }
-    setIsOpen(true);
+    event.target.value = null;
   };
 
   useEffect(() => {
@@ -103,14 +96,8 @@ const UserManage = () => {
         setBooks(res.books);
       } catch (err) { }
     };
-    return () => {
-      getBooks();
-    };
+    getBooks();
   }, [isRender]);
-
-  useEffect(() => {
-    setCategoryId(null);
-  }, [isOpen]);
 
   useEffect(() => {
     const getCategories = async () => {
@@ -119,9 +106,7 @@ const UserManage = () => {
         setCategories(res.cats);
       } catch (err) { }
     };
-    return () => {
-      getCategories();
-    };
+    getCategories();
   }, [isRender]);
 
   const showModalAdd = () => {
@@ -140,6 +125,7 @@ const UserManage = () => {
     setViewCategoryId(record.categoryData.name);
     setAmount(record.amount);
     setPreviewImgURL(record.image);
+    setImage(record.image);
     setFormName("edit");
     setIsModalOpen(true);
   };
@@ -148,6 +134,10 @@ const UserManage = () => {
     const checkInputBook = checkInput();
     if (checkInputBook === false) {
       toast.error("Bạn chưa nhập đầy đủ thông tin sách");
+      return;
+    }
+    if (amount <= 0) {
+      toast.error("Số lượng sách không hợp lệ");
       return;
     }
     if (formName === "add") {
@@ -191,6 +181,11 @@ const UserManage = () => {
 
   const handleCategoryChange = (value) => {
     setCategoryId(value);
+    categories.map((index) => {
+      if (index.id === Number(value)) {
+        setViewCategoryId(index.name);
+      }
+    });
   };
 
   const handleDelete = async (record) => {
@@ -253,7 +248,7 @@ const UserManage = () => {
               style={{
                 width: 120,
               }}
-              defaultValue={viewCategoryId}
+              value={viewCategoryId}
               onChange={(e) => handleCategoryChange(e)}
             >
               {categories.map((category) => (
@@ -276,15 +271,11 @@ const UserManage = () => {
             id="previewImg"
             type="file"
             hidden
-            onClick={(event) => handleOnChangeImage(event)}
+            onChange={(event) => handleOnChangeImage(event)}
           />
           <label className="lable-upload" htmlFor="previewImg">
             Tải ảnh <i className="fas fa-upload"></i>
           </label>
-          <div
-            style={{ backgroundImage: `url(${previewImgURL})` }}
-            onClick={openPreviewImage}
-          ></div>
           <div
             style={{
               textAlign: "center",

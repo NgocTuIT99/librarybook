@@ -3,7 +3,6 @@ import { UserAuth } from "../../../Context/AuthProvider";
 import { Row, Col, Image, Modal, Typography } from "antd";
 import {
   getAllBookByCategoryService,
-  getAllBookService,
 } from "../../../service/bookService";
 import { borrowBookService } from "../../../service/historyService";
 import { ToastContainer, toast } from "react-toastify";
@@ -16,14 +15,13 @@ export default function ProductList({ selectedCategory }) {
 
   useEffect(() => {
     const getBooks = async () => {
-      console.log(selectedCategory);
       try {
         let res = await getAllBookByCategoryService(selectedCategory);
         setBooks(res.books);
       } catch (err) { }
     };
     getBooks();
-  }, [selectedCategory]);
+  }, [selectedCategory, isModalOpen]);
 
   const showModal = (book) => {
     setBook(book);
