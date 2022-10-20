@@ -1,4 +1,4 @@
-import { Space, Table, Typography, Button, Modal, Input } from "antd";
+import { Space, Table, Typography, Button, Modal, Input, Form } from "antd";
 import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import {
@@ -44,6 +44,7 @@ const UserManage = () => {
   const [formName, setFormName] = useState("");
   const [isRender, setIsRender] = useState(false);
   const { TextArea } = Input;
+  const [form] = Form.useForm()
 
   useEffect(() => {
     const getCategories = async () => {
@@ -56,6 +57,11 @@ const UserManage = () => {
       getCategories();
     };
   }, [isRender]);
+
+  useEffect(() => {
+    form.setFieldsValue({ name: name, description: description })
+  }, [form, name, description])
+
 
   const showModalAdd = () => {
     setFormName("add");
@@ -71,11 +77,6 @@ const UserManage = () => {
   };
 
   const handleOk = async () => {
-    const checkCategory = checkInput()
-    if (checkCategory === false) {
-      toast.error("Bạn chưa nhập tên thể loại");
-      return;
-    }
     if (formName === "add") {
       const data = await createCategoryService({
         name: name,
@@ -116,6 +117,7 @@ const UserManage = () => {
   };
 
   const handleCancel = () => {
+    clearState();
     setIsModalOpen(false);
   };
 
@@ -123,14 +125,6 @@ const UserManage = () => {
     setName("");
     setDescription("");
   };
-
-  const checkInput = () => {
-    if (name === "") {
-      return false;
-    } else {
-      return true;
-    }
-  }
 
   return (
     <div style={{ margin: "5px" }}>
@@ -141,18 +135,28 @@ const UserManage = () => {
       <Modal
         title={formName === "add" ? "Thêm thể loại" : "Chỉnh sửa thể loại"}
         open={isModalOpen}
-        onOk={handleOk}
         onCancel={handleCancel}
+        footer={null}
       >
-        <Typography.Text>Tên thể loại</Typography.Text>
-        <Input onChange={(e) => setName(e.target.value)} value={name} />
-        <br />
-        <br />
-        <Typography.Text>Mô tả</Typography.Text>
-        <TextArea
-          onChange={(e) => setDescription(e.target.value)}
-          value={description}
-        />
+        <Form labelCol={{ span: 6 }} wrapperCol={{ span: 15 }} onFinish={handleOk} form={form}
+          initialValues={{ name: name, description: description }} >
+          <Form.Item name="name" label="Tên thể loại" rules={[
+            {
+              required: true,
+              message: "Nhập thể loại"
+            },
+          ]}>
+            <Input onChange={(e) => setName(e.target.value)} />
+          </Form.Item>
+
+          <Form.Item name="description" label="Mô tả thể loại">
+            <TextArea onChange={(e) => setDescription(e.target.value)} />
+          </Form.Item>
+
+          <Form.Item style={{ width: "100%", textAlign: "right" }}>
+            <Button type="primary" htmlType="submit">{formName === "add" ? "Thêm thể loại" : "Chỉnh sửa thể loại"}</Button>
+          </Form.Item>
+        </Form>
       </Modal>
       <Table
         rowKey="Id"

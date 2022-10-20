@@ -1,4 +1,6 @@
 import bookService from "../services/bookService";
+import { bookCreateInput, bookGetAllInput, bookEditInput, bookDeleteInput } from "../Validate";
+import Validator from "fastest-validator";
 
 let getAllBook = async (req, res) => {
   try {
@@ -14,6 +16,15 @@ let getAllBook = async (req, res) => {
 };
 
 let getBookByCategory = async (req, res) => {
+  let v = new Validator();
+  let validationResponse = v.validate(req.query, bookGetAllInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
+    });
+  }
   try {
     let books = await bookService.getBookByCategory(req.query.id);
     return res.status(200).json({
@@ -27,6 +38,15 @@ let getBookByCategory = async (req, res) => {
 };
 
 let createBook = async (req, res) => {
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, bookCreateInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
+    });
+  }
   try {
     let book = await bookService.createBook(req.body);
     return res.status(200).json(book);
@@ -36,10 +56,13 @@ let createBook = async (req, res) => {
 };
 
 let editBook = async (req, res) => {
-  if (!req.body.id) {
-    return res.status(200).json({
-      errCode: 1,
-      message: "Thiếu thông số đầu vào!",
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, bookEditInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
     });
   }
   try {
@@ -51,10 +74,13 @@ let editBook = async (req, res) => {
 };
 
 let deleteBook = async (req, res) => {
-  if (!req.body.id) {
-    return res.status(200).json({
-      errCode: 1,
-      message: "Thiếu thông số đầu vào!",
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, bookDeleteInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
     });
   }
   try {

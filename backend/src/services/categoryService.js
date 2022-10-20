@@ -66,7 +66,8 @@ let editCat = (data) => {
 let deleteCat = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      let cat = await db.Book.findOne({
+      console.log(data)
+      let cat = await db.Category.findOne({
         where: { id: data.id },
         raw: false,
       });

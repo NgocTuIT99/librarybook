@@ -1,4 +1,6 @@
 import categoryService from "../services/categoryService";
+import { categoryEditInput, categoryDeleteInput, categoryCreateInput } from "../Validate";
+import Validator from "fastest-validator";
 
 let getAllCat = async (req, res) => {
   try {
@@ -14,6 +16,15 @@ let getAllCat = async (req, res) => {
 };
 
 let createCat = async (req, res) => {
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, categoryCreateInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
+    });
+  }
   try {
     let cat = await categoryService.createCat(req.body);
     return res.status(200).json(cat);
@@ -23,10 +34,13 @@ let createCat = async (req, res) => {
 };
 
 let editCat = async (req, res) => {
-  if (!req.body.id) {
-    return res.status(200).json({
-      errCode: 1,
-      message: "Thiếu thông số đầu vào!",
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, categoryEditInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
     });
   }
   try {
@@ -38,10 +52,13 @@ let editCat = async (req, res) => {
 };
 
 let deleteCat = async (req, res) => {
-  if (!req.body.id) {
-    return res.status(200).json({
-      errCode: 1,
-      message: "Thiếu thông số đầu vào!",
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, categoryDeleteInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
     });
   }
   try {

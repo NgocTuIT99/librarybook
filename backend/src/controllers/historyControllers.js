@@ -1,4 +1,6 @@
 import historyService from "../services/historyService";
+import { historyGetAllInput, historyBorrowBookInput, historyReturnBookInput } from "../Validate";
+import Validator from "fastest-validator";
 
 let getAllHistory = async (req, res) => {
   try {
@@ -14,6 +16,15 @@ let getAllHistory = async (req, res) => {
 };
 
 let getAllHistoryByUser = async (req, res) => {
+  let v = new Validator();
+  let validationResponse = v.validate(req.query, historyGetAllInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
+    });
+  }
   try {
     let his = await historyService.getAllHistoryByUser(req.query.id);
     return res.status(200).json({
@@ -27,6 +38,15 @@ let getAllHistoryByUser = async (req, res) => {
 };
 
 let borrowBook = async (req, res) => {
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, historyBorrowBookInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
+    });
+  }
   try {
     let data = await historyService.borrowBook(req.body);
     return res.status(200).json(data);
@@ -36,6 +56,15 @@ let borrowBook = async (req, res) => {
 };
 
 let returnBook = async (req, res) => {
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, historyReturnBookInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
+    });
+  }
   try {
     let data = await historyService.returnBook(req.body);
     return res.status(200).json(data);

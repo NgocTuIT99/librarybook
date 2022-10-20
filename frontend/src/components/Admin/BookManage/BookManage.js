@@ -8,6 +8,7 @@ import {
   Input,
   Select,
   Image,
+  Form
 } from "antd";
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
@@ -20,10 +21,6 @@ import {
 } from "../../../service/bookService";
 import { ToastContainer, toast } from "react-toastify";
 import { getAllCategoryService } from "../../../service/categoryService";
-
-const BoxDiv = styled.div`
-  display: flex;
-`;
 
 const { Option } = Select;
 
@@ -76,6 +73,7 @@ const UserManage = () => {
   const [formName, setFormName] = useState("");
   const [isRender, setIsRender] = useState(false);
   const [previewImgURL, setPreviewImgURL] = useState("");
+  const [form] = Form.useForm()
 
   const handleOnChangeImage = async (event) => {
     let data = event.target.files;
@@ -109,8 +107,19 @@ const UserManage = () => {
     getCategories();
   }, [isRender]);
 
+  useEffect(() => {
+    form.setFieldsValue({ name: name, author: author, categoryId: viewCategoryId, amount: amount, image: image })
+  }, [form, name, author, categoryId, amount, image])
+
   const showModalAdd = () => {
     setFormName("add");
+    setName("");
+    setAuthor("");
+    setCategoryId(null);
+    setImage("");
+    setAmount(1);
+    setPreviewImgURL("");
+    setViewCategoryId("");
     setIsModalOpen(true);
   };
 
@@ -131,20 +140,11 @@ const UserManage = () => {
   };
 
   const handleOk = async () => {
-    const checkInputBook = checkInput();
-    if (checkInputBook === false) {
-      toast.error("Bạn chưa nhập đầy đủ thông tin sách");
-      return;
-    }
-    if (amount <= 0) {
-      toast.error("Số lượng sách không hợp lệ");
-      return;
-    }
     if (formName === "add") {
       const data = await createBookService({
         name: name,
         author: author,
-        categoryId: categoryId,
+        categoryId: Number(categoryId),
         amount: amount,
         image: image,
       });
@@ -159,7 +159,7 @@ const UserManage = () => {
         id: bookId,
         name: name,
         author: author,
-        categoryId: categoryId,
+        categoryId: Number(categoryId),
         amount: amount,
         image: image,
       });
@@ -169,13 +169,11 @@ const UserManage = () => {
         toast.error(data.message);
       }
     }
-    clearState();
     setIsRender(!isRender);
     setIsModalOpen(false);
   };
 
   const handleCancel = () => {
-    clearState();
     setIsModalOpen(false);
   };
 
@@ -195,31 +193,12 @@ const UserManage = () => {
     } else {
       toast.error(data.message);
     }
-    setIsRender(!isRender);
-    clearState();
-  };
-
-  const clearState = () => {
-    setName("");
-    setAuthor("");
-    setCategoryId(null);
-    setImage("");
-    setAmount(1);
-    setPreviewImgURL("");
-    setViewCategoryId("");
+    setIsRender(!isRender);;
   };
 
   const onChangeInput = (value) => {
     setAmount(value);
   };
-
-  const checkInput = () => {
-    if (name === "" || author === "" || categoryId === 0) {
-      return false;
-    } else {
-      return true;
-    }
-  }
 
   return (
     <div style={{ margin: "5px" }}>
@@ -230,23 +209,36 @@ const UserManage = () => {
       <Modal
         title={formName === "add" ? "Thêm sách" : "Chỉnh sửa sách"}
         open={isModalOpen}
-        onOk={handleOk}
         onCancel={handleCancel}
+        footer={null}
       >
-        <Typography.Text>Tên sách</Typography.Text>
-        <Input onChange={(e) => setName(e.target.value)} value={name} />
-        <br />
-        <br />
-        <Typography.Text>Tác giả</Typography.Text>
-        <Input onChange={(e) => setAuthor(e.target.value)} value={author} />
-        <br />
-        <br />
-        <BoxDiv>
-          <div style={{ marginRight: "50px" }}>
-            <Typography.Text>Thể loại </Typography.Text>
+        <Form labelCol={{ span: 6 }} wrapperCol={{ span: 15 }} onFinish={handleOk} form={form}
+          initialValues={{ name: name, author: author, categoryId: categoryId, amount: amount, image: image }} >
+          <Form.Item name="name" label="Tên sách" rules={[
+            {
+              required: true,
+              message: "Nhập tên sách"
+            },
+          ]}>
+            <Input onChange={(e) => setName(e.target.value)} />
+          </Form.Item>
+          <Form.Item name="author" label="Tác giả" rules={[
+            {
+              required: true,
+              message: "Nhập tên tác giả"
+            },
+          ]}>
+            <Input onChange={(e) => setAuthor(e.target.value)} />
+          </Form.Item>
+          <Form.Item name="categoryId" label="Thể loại" rules={[
+            {
+              required: true,
+              message: "Chọn thể loại"
+            },
+          ]}>
             <Select
               style={{
-                width: 120,
+                width: "100%",
               }}
               value={viewCategoryId}
               onChange={(e) => handleCategoryChange(e)}
@@ -255,43 +247,46 @@ const UserManage = () => {
                 <Option key={category.id}>{category.name}</Option>
               ))}
             </Select>
-          </div>
-          <div>
-            <Typography.Text>Số lượng </Typography.Text>
+          </Form.Item>
+          <Form.Item name="amount" label="Số lượng">
             <InputNumber
               min={1}
               max={100}
-              value={amount}
               onChange={onChangeInput}
             />
-          </div>
-        </BoxDiv>
-        <div style={{ marginTop: "30px" }}>
-          <input
-            id="previewImg"
-            type="file"
-            hidden
-            onChange={(event) => handleOnChangeImage(event)}
-          />
-          <label className="lable-upload" htmlFor="previewImg">
-            Tải ảnh <i className="fas fa-upload"></i>
-          </label>
-          <div
-            style={{
-              textAlign: "center",
-            }}
-          >
-            <Image
-              width={200}
-              src={previewImgURL}
-              style={{
-                border: "1px solid grey",
-                marginTop: "5px",
-                justifyContent: "center",
-              }}
-            />
-          </div>
-        </div>
+          </Form.Item>
+          <Form.Item name="image">
+            <div style={{ marginLeft: "50px" }}>
+              <input
+                id="previewImg"
+                type="file"
+                hidden
+                onChange={(event) => handleOnChangeImage(event)}
+              />
+              <label className="lable-upload" htmlFor="previewImg">
+                Tải ảnh <i className="fas fa-upload"></i>
+              </label>
+              <div
+                style={{
+                  textAlign: "center",
+                }}
+              >
+                <Image
+                  width={200}
+                  src={previewImgURL}
+                  style={{
+                    border: "1px solid grey",
+                    marginTop: "5px",
+                    justifyContent: "center",
+                  }}
+                />
+              </div>
+            </div>
+          </Form.Item>
+          <Form.Item style={{ width: "100%", textAlign: "right" }}>
+            <Button type="primary" htmlType="submit">{formName === "add" ? "Thêm sách" : "Chỉnh sửa sách"}</Button>
+          </Form.Item>
+        </Form>
       </Modal>
       <Table
         rowKey="Id"

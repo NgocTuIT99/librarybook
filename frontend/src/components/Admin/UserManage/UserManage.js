@@ -1,4 +1,4 @@
-import { Space, Table, Typography, Button, Modal, Input, Select } from "antd";
+import { Space, Table, Typography, Button, Modal, Input, Select, Form } from "antd";
 import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import {
@@ -7,7 +7,6 @@ import {
   editUserService,
   deleteUserService,
 } from "../../../service/userService";
-import validator from 'validator';
 
 const { Option } = Select;
 
@@ -62,6 +61,7 @@ const UserManage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formName, setFormName] = useState("");
   const [isRender, setIsRender] = useState(false);
+  const [form] = Form.useForm()
 
   useEffect(() => {
     const getUsers = async () => {
@@ -75,7 +75,12 @@ const UserManage = () => {
     };
   }, [isRender]);
 
+  useEffect(() => {
+    form.setFieldsValue({ email: email, password: password, fullName: fullName, address: address, phoneNumber: phoneNumber, providerId: providerId })
+  }, [form, email, password, fullName, address, phoneNumber, providerId])
+
   const showModalAdd = () => {
+    clearState();
     setFormName("add");
     setIsModalOpen(true);
   };
@@ -94,11 +99,6 @@ const UserManage = () => {
 
   const handleOk = async () => {
     if (formName === "add") {
-      const checkInput = validateInputAdd();
-      if (checkInput === false) {
-        toast.error("Bạn cần nhập chính xác email, password và tên người dùng")
-        return;
-      }
       const data = await createUserService({
         email: email,
         password: password,
@@ -114,11 +114,6 @@ const UserManage = () => {
       }
     }
     if (formName === "edit") {
-      const checkInput = validateInputEdit();
-      if (checkInput === false) {
-        toast.error("Bạn cần nhập chính xác email và tên người dùng")
-        return;
-      }
       const data = await editUserService({
         id: userId,
         email: email,
@@ -165,22 +160,6 @@ const UserManage = () => {
     setProviderId("admin");
   };
 
-  const validateInputAdd = () => {
-    if (validator.isEmail(email) && password !== "" && fullName !== "") {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  const validateInputEdit = () => {
-    if (validator.isEmail(email) && fullName !== "") {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   const handleChangeProviderId = (value) => {
     setProviderId(value);
   }
@@ -194,52 +173,66 @@ const UserManage = () => {
       <Modal
         title={formName === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}
         open={isModalOpen}
-        onOk={handleOk}
         onCancel={handleCancel}
+        footer={null}
       >
-        <Typography.Text>Email</Typography.Text>
-        <Input onChange={(e) => setEmail(e.target.value)} value={email} />
-        <br />
-        <br />
-        {formName === "add" ? (
-          <>
-            <Typography.Text>Mật khẩu</Typography.Text>
-            <Input.Password
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-            />
-            <br />
-            <br />
-          </>
-        ) : (
-          <></>
-        )}
-        <Typography.Text>Họ và tên</Typography.Text>
-        <Input onChange={(e) => setFullName(e.target.value)} value={fullName} />
-        <br />
-        <br />
-        <Typography.Text>Địa chỉ</Typography.Text>
-        <Input onChange={(e) => setAddress(e.target.value)} value={address} />
-        <br />
-        <br />
-        <Typography.Text>Số điện thoại</Typography.Text>
-        <Input
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          value={phoneNumber}
-        />
-        <br />
-        <br />
-        <Typography.Text style={{ marginRight: "10px" }}>Vai trò</Typography.Text>
-        <Select
-          value={providerId}
-          style={{
-            width: 120,
-          }}
-          onChange={handleChangeProviderId}
-        >
-          <Option value="admin">Admin</Option>
-          <Option value="user">User</Option>
-        </Select>
+        <Form labelCol={{ span: 6 }} wrapperCol={{ span: 15 }} onFinish={handleOk} form={form}
+          initialValues={{ email: email, password: password, fullName: fullName, address: address, phoneNumber: phoneNumber, providerId: providerId }} >
+          <Form.Item name="email" label="Email" rules={[
+            {
+              required: true,
+              message: "Nhập email"
+            },
+            { type: "email", message: "Email không hợp lệ" }
+          ]}>
+            <Input onChange={(e) => setEmail(e.target.value)} />
+          </Form.Item>
+          {formName === "add" ?
+            <Form.Item name="password" label="Mật khẩu" rules={[
+              {
+                required: true,
+                message: "Nhập mật khẩu"
+              },
+            ]}>
+              <Input.Password onChange={(e) => setPassword(e.target.value)} />
+            </Form.Item> : null}
+          <Form.Item name="fullName" label="Tên người dùng" rules={[
+            {
+              required: true,
+              message: "Nhập tên người dùng"
+            },
+          ]}>
+            <Input onChange={(e) => setFullName(e.target.value)} />
+          </Form.Item>
+          <Form.Item name="address" label="Địa chỉ">
+            <Input onChange={(e) => setAddress(e.target.value)} />
+          </Form.Item>
+          <Form.Item name="phoneNumber" label="Số điện thoại" rules={[
+            {
+              required: true,
+              message: "Nhập số điện thoại",
+              pattern: new RegExp(/^[0-9]+$/)
+            },
+          ]}>
+            <Input onChange={(e) => setPhoneNumber(e.target.value)} />
+          </Form.Item>
+          <Form.Item name="providerId" label="Vai trò">
+            <Select
+              value={providerId}
+              style={{
+                width: 120,
+              }}
+              onChange={handleChangeProviderId}
+            >
+              <Option value="admin">Admin</Option>
+              <Option value="user">User</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item style={{ width: "100%", textAlign: "right" }}>
+            <Button type="primary" htmlType="submit">{formName === "add" ? "Thêm người dùng" : "Chỉnh sửa người dùng"}</Button>
+          </Form.Item>
+        </Form>
       </Modal>
       <Table
         rowKey="Id"

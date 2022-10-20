@@ -1,13 +1,17 @@
 import userService from "../services/userService";
+import { userLoginInput, userCreateInput, userEditInput, userDeleteInput } from "../Validate";
+import Validator from "fastest-validator";
 
 let handleLogin = async (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
+  let v = new Validator();
+  let validationResponse = v.validate({ email, password }, userLoginInput)
 
-  if (!email || !password) {
-    return res.status(500).json({
-      errCode: 1,
-      message: "Thiếu thông số đầu vào!",
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
     });
   }
   try {
@@ -37,6 +41,15 @@ let getAllUser = async (req, res) => {
 };
 
 let createUser = async (req, res) => {
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, userCreateInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
+    });
+  }
   try {
     let user = await userService.createUser(req.body);
     return res.status(200).json(user);
@@ -46,12 +59,16 @@ let createUser = async (req, res) => {
 };
 
 let editUser = async (req, res) => {
-  if (!req.body.id) {
-    return res.status(200).json({
-      errCode: 1,
-      message: "Thiếu thông số đầu vào!",
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, userEditInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
     });
   }
+
   try {
     let user = await userService.editUser(req.body);
     return res.status(200).json(user);
@@ -61,10 +78,13 @@ let editUser = async (req, res) => {
 };
 
 let deleteUser = async (req, res) => {
-  if (!req.body.id) {
-    return res.status(200).json({
-      errCode: 1,
-      message: "Thiếu thông số đầu vào!",
+  let v = new Validator();
+  let validationResponse = v.validate(req.body, userDeleteInput)
+
+  if (validationResponse !== true) {
+    return res.status(400).json({
+      errCode: validationResponse,
+      message: "Validation failed!",
     });
   }
   try {

@@ -59,7 +59,7 @@ const History = () => {
       try {
         const res = await getAllHistoryByUserService(Number(id));
         setHistories(res.his);
-      } catch (err) {}
+      } catch (err) { }
     };
     return () => {
       getHistories();

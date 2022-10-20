@@ -16,7 +16,7 @@ export default function ProductList({ selectedCategory }) {
   useEffect(() => {
     const getBooks = async () => {
       try {
-        let res = await getAllBookByCategoryService(selectedCategory);
+        let res = await getAllBookByCategoryService(Number(selectedCategory));
         setBooks(res.books);
       } catch (err) { }
     };
@@ -32,12 +32,12 @@ export default function ProductList({ selectedCategory }) {
     let data = [];
     if (user.id) {
       data = await borrowBookService({
-        userId: user.id,
+        userId: Number(user.id),
         bookId: book.id,
       });
     } else {
       data = await borrowBookService({
-        userId: user.uid.replace(/[^0-9]/g, ""),
+        userId: Number(user.uid.replace(/[^0-9]/g, "")),
         bookId: book.id,
       });
     }
