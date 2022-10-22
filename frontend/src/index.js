@@ -5,8 +5,8 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import "../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
-import "../assets/css/bootstrap-login-form.min.css";
-import "../assets/js/mdb.min.js";
+import "../src/assets/css/bootstrap-login-form.min.css";
+import "../src/assets/js/mdb.min";
 import "react-toastify/dist/ReactToastify.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
