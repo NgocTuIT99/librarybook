@@ -7,6 +7,8 @@ import {
   editCategoryService,
   deleteCategoryService,
 } from "../../../service/categoryService";
+import { UserAuth } from "../../../Context/AuthProvider";
+import axiosJWT from "../../../axiosJWT";
 
 const UserManage = () => {
   const columns = [
@@ -45,17 +47,18 @@ const UserManage = () => {
   const [isRender, setIsRender] = useState(false);
   const { TextArea } = Input;
   const [form] = Form.useForm()
+  const { accessToken, refreshToken, setAccessToken, setRefreshToken } = UserAuth();
+  const axios = axiosJWT(accessToken, refreshToken, setAccessToken, setRefreshToken);
+
 
   useEffect(() => {
     const getCategories = async () => {
       try {
-        const res = await getAllCategoryService();
+        const res = await getAllCategoryService(accessToken, axios);
         setCategories(res.cats);
       } catch (err) { }
     };
-    return () => {
-      getCategories();
-    };
+    getCategories();
   }, [isRender]);
 
   useEffect(() => {
@@ -81,7 +84,7 @@ const UserManage = () => {
       const data = await createCategoryService({
         name: name,
         description: description,
-      });
+      }, accessToken, axios);
       if (data.errCode === 0) {
         toast.success(data.message);
       } else {
@@ -93,7 +96,7 @@ const UserManage = () => {
         id: categoryId,
         name: name,
         description: description,
-      });
+      }, accessToken, axios);
       if (data.errCode === 0) {
         toast.success(data.message);
       } else {
@@ -106,7 +109,7 @@ const UserManage = () => {
   };
 
   const handleDelete = async (record) => {
-    const data = await deleteCategoryService(record.id);
+    const data = await deleteCategoryService(record.id, accessToken, axios);
     if (data.errCode === 0) {
       toast.success(data.message);
     } else {

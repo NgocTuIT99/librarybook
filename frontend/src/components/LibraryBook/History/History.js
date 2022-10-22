@@ -6,6 +6,7 @@ import {
   returnBookService,
 } from "../../../service/historyService";
 import { ToastContainer, toast } from "react-toastify";
+import axiosJWT from "../../../axiosJWT";
 
 const History = () => {
   const columns = [
@@ -50,20 +51,19 @@ const History = () => {
   const [returnDate, setReturnDate] = useState("");
   const [status, setStatus] = useState("");
   const tableColumns = columns.map((item) => ({ ...item }));
-  const { setSelectedForm, user } = UserAuth();
+  const { setSelectedForm, user, accessToken, refreshToken, setAccessToken, setRefreshToken } = UserAuth();
   const [loadings, setLoadings] = useState(false);
+  const axios = axiosJWT(accessToken, refreshToken, setAccessToken, setRefreshToken);
 
   useEffect(() => {
     const getHistories = async () => {
       let id = user.id ? user.id : user.uid.replace(/[^0-9]/g, "");
       try {
-        const res = await getAllHistoryByUserService(Number(id));
+        const res = await getAllHistoryByUserService(Number(id), accessToken, axios);
         setHistories(res.his);
       } catch (err) { }
     };
-    return () => {
-      getHistories();
-    };
+    getHistories();
   }, [loadings]);
 
   const handleReturn = async (record) => {
@@ -72,12 +72,12 @@ const History = () => {
       data = await returnBookService({
         userId: user.id,
         bookId: record.bookId,
-      });
+      }, accessToken, axios);
     } else {
       data = await returnBookService({
         userId: Number(user.uid.replace(/[^0-9]/g, "")),
         bookId: record.bookId,
-      });
+      }, accessToken, axios);
     }
     if (data.errCode === 0) {
       toast.success(data.message);

@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../../Context/AuthProvider";
 import { ToastContainer, toast } from "react-toastify";
-import { handleLoginService } from "../../service/userService";
+import { handleLoginService, getTokenLoginService } from "../../service/userService";
 
 const fbProvider = new FacebookAuthProvider();
 const ggProvider = new GoogleAuthProvider();
@@ -15,11 +15,13 @@ export default function Login({ setCheckLogin }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { setUser } = UserAuth();
+  const { user, setUser, setAccessToken, setRefreshToken } = UserAuth();
 
   const handleSubmit = async () => {
     const data = await handleLoginService(email, password);
     if (data) {
+      setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
       if (data.user.providerId === "admin" && data.errCode === 0) {
         setUser(data.user);
         navigate("/admin");
@@ -39,6 +41,11 @@ export default function Login({ setCheckLogin }) {
     setError("");
     try {
       await auth.signInWithPopup(fbProvider);
+      const data = await getTokenLoginService(user);
+      if (data) {
+        setAccessToken(data.accessToken);
+        setRefreshToken(data.refreshToken);
+      }
       navigate("/");
       setCheckLogin(true);
     } catch (e) {
@@ -52,6 +59,11 @@ export default function Login({ setCheckLogin }) {
     setError("");
     try {
       await auth.signInWithPopup(ggProvider);
+      const data = await getTokenLoginService(user);
+      if (data) {
+        setAccessToken(data.accessToken);
+        setRefreshToken(data.refreshToken);
+      }
       navigate("/");
       setCheckLogin(true);
     } catch (e) {

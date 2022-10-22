@@ -1,8 +1,34 @@
 import db from "../models/index";
 import bcrypt from "bcryptjs";
 const salt = bcrypt.genSaltSync(10);
+import jwt from "jsonwebtoken";
+require("dotenv").config();
 
-let handleUserLogin = (email, password) => {
+let refreshTokens = [];
+
+let generateAccessToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      isAdmin: user.providerId,
+    },
+    process.env.JWT_ACCESS_KEY,
+    { expiresIn: "30s" }
+  );
+}
+
+let generateRefreshToken = (user) => {
+  return jwt.sign(
+    {
+      id: user.id,
+      isAdmin: user.providerId,
+    },
+    process.env.JWT_REFRESH_KEY,
+    { expiresIn: "365d" }
+  );
+}
+
+let handleUserLogin = (res, email, password) => {
   return new Promise(async (resolve, reject) => {
     try {
       let userData = {};
@@ -19,6 +45,14 @@ let handleUserLogin = (email, password) => {
             userData.errMessage = "ok";
             delete user.password;
             userData.user = user;
+            //Generate access token
+            const accessToken = generateAccessToken(user);
+            //Generate refresh token
+            const refreshToken = generateRefreshToken(user);
+            refreshTokens.push(refreshToken);
+
+            userData.refreshToken = refreshToken;
+            userData.accessToken = accessToken;
           } else {
             userData.errCode = 3;
             userData.errMessage = "Sai mật khẩu!";
@@ -36,6 +70,61 @@ let handleUserLogin = (email, password) => {
       reject(e);
     }
   });
+};
+
+let getTokenLogin = (res, user) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let userData = {};
+      if (user) {
+        userData.errCode = 0;
+        userData.errMessage = "ok";
+        userData.user = {
+          id: user.uid,
+          providerId: "user"
+        };
+        //Generate access token
+        const accessToken = generateAccessToken(userData.user);
+        //Generate refresh token
+        const refreshToken = generateRefreshToken(userData.user);
+        refreshTokens.push(refreshToken);
+        userData.refreshToken = refreshToken;
+        userData.accessToken = accessToken;
+      }
+      resolve(userData);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+let requestRefreshToken = async (res, data) => {
+  console.log(data.refreshToken);
+  console.log(refreshTokens);
+  if (!data.refreshToken) return res.status(401).json("You're not authenticated");
+  if (!refreshTokens.includes(data.refreshToken)) {
+    return res.status(403).json("Refresh token is not valid");
+  }
+  jwt.verify(data.refreshToken, process.env.JWT_REFRESH_KEY, (err, user) => {
+    if (err) {
+      console.log(err);
+    }
+    //create new access token, refresh token and send to user
+    const newAccessToken = generateAccessToken(user);
+    const newRefreshToken = generateRefreshToken(user);
+    refreshTokens.push(newRefreshToken);
+    res.status(200).json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    });
+  });
+};
+
+let logOut = async (req, res) => {
+  //Clear cookies when user logs out
+  refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
+  res.clearCookie("refreshToken");
+  res.status(200).json("Logged out successfully!");
 };
 
 let checkUserEmail = (userEmail) => {
@@ -200,4 +289,7 @@ module.exports = {
   createUser: createUser,
   editUser: editUser,
   deleteUser: deleteUser,
+  requestRefreshToken: requestRefreshToken,
+  logOut: logOut,
+  getTokenLogin: getTokenLogin,
 };

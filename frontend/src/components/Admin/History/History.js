@@ -1,6 +1,8 @@
 import { Space, Table, Typography, Button } from "antd";
 import React, { useState, useEffect } from "react";
 import { getAllHistoryService } from "../../../service/historyService";
+import { UserAuth } from "../../../Context/AuthProvider";
+import axiosJWT from "../../../axiosJWT";
 
 const UserManage = () => {
   const columns = [
@@ -46,18 +48,18 @@ const UserManage = () => {
   const [status, setStatus] = useState("");
   const tableColumns = columns.map((item) => ({ ...item }));
   const [isRender, setIsRender] = useState(false);
+  const { accessToken, refreshToken, setAccessToken, setRefreshToken } = UserAuth();
+  const axios = axiosJWT(accessToken, refreshToken, setAccessToken, setRefreshToken);
 
   useEffect(() => {
     const getHistories = async () => {
       try {
-        const res = await getAllHistoryService();
+        const res = await getAllHistoryService(accessToken, axios);
         setHistories(res.his);
         return;
       } catch (err) { }
     };
-    return () => {
-      getHistories();
-    };
+    getHistories();
   }, [isRender]);
 
   return (

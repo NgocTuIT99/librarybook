@@ -1,14 +1,18 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase/config";
+import { logOut } from "../service/userService";
 
 const UserContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState({});
   const [selectedForm, setSelectedForm] = useState("");
+  const [accessToken, setAccessToken] = useState("");
+  const [refreshToken, setRefreshToken] = useState(null);
 
-  const logout = () => {
+  const logout = async () => {
+    //await logOut(accessToken);
     return signOut(auth);
   };
 
@@ -31,6 +35,10 @@ export const AuthProvider = ({ children }) => {
         logout,
         selectedForm,
         setSelectedForm,
+        accessToken,
+        setAccessToken,
+        refreshToken,
+        setRefreshToken
       }}
     >
       {children}

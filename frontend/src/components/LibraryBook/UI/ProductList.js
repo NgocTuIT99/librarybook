@@ -6,17 +6,19 @@ import {
 } from "../../../service/bookService";
 import { borrowBookService } from "../../../service/historyService";
 import { ToastContainer, toast } from "react-toastify";
+import axiosJWT from "../../../axiosJWT";
 
 export default function ProductList({ selectedCategory }) {
-  const { user } = UserAuth();
+  const { user, accessToken, refreshToken, setAccessToken, setRefreshToken } = UserAuth();
   const [books, setBooks] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [book, setBook] = useState({});
+  const axios = axiosJWT(accessToken, refreshToken, setAccessToken, setRefreshToken);
 
   useEffect(() => {
     const getBooks = async () => {
       try {
-        let res = await getAllBookByCategoryService(Number(selectedCategory));
+        let res = await getAllBookByCategoryService(Number(selectedCategory), accessToken, axios);
         setBooks(res.books);
       } catch (err) { }
     };
@@ -34,12 +36,12 @@ export default function ProductList({ selectedCategory }) {
       data = await borrowBookService({
         userId: Number(user.id),
         bookId: book.id,
-      });
+      }, accessToken, axios);
     } else {
       data = await borrowBookService({
         userId: Number(user.uid.replace(/[^0-9]/g, "")),
         bookId: book.id,
-      });
+      }, accessToken, axios);
     }
     if (data.errCode === 0) {
       toast.success(data.message);

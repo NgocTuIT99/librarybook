@@ -7,6 +7,8 @@ import {
   editUserService,
   deleteUserService,
 } from "../../../service/userService";
+import { UserAuth } from "../../../Context/AuthProvider";
+import axiosJWT from "../../../axiosJWT";
 
 const { Option } = Select;
 
@@ -62,17 +64,17 @@ const UserManage = () => {
   const [formName, setFormName] = useState("");
   const [isRender, setIsRender] = useState(false);
   const [form] = Form.useForm()
+  const { accessToken, refreshToken, setAccessToken, setRefreshToken } = UserAuth();
+  const axios = axiosJWT(accessToken, refreshToken, setAccessToken, setRefreshToken);
 
   useEffect(() => {
     const getUsers = async () => {
       try {
-        const res = await getAllUserService();
+        const res = await getAllUserService(accessToken, axios);
         setUsers(res.users);
       } catch (err) { }
     };
-    return () => {
-      getUsers();
-    };
+    getUsers();
   }, [isRender]);
 
   useEffect(() => {
@@ -106,7 +108,7 @@ const UserManage = () => {
         address: address,
         phoneNumber: phoneNumber,
         providerId: providerId,
-      });
+      }, accessToken, axios);
       if (data.errCode === 0) {
         toast.success(data.message);
       } else {
@@ -122,7 +124,7 @@ const UserManage = () => {
         address: address,
         phoneNumber: phoneNumber,
         providerId: providerId,
-      });
+      }, accessToken, axios);
       if (data.errCode === 0) {
         toast.success(data.message);
       } else {
@@ -140,7 +142,7 @@ const UserManage = () => {
   };
 
   const handleDelete = async (record) => {
-    const data = await deleteUserService(record.id);
+    const data = await deleteUserService(record.id, accessToken, axios);
     if (data.errCode === 0) {
       toast.success(data.message);
     } else {

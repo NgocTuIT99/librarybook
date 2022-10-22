@@ -15,12 +15,14 @@ let handleLogin = async (req, res) => {
     });
   }
   try {
-    let userData = await userService.handleUserLogin(email, password);
+    let userData = await userService.handleUserLogin(res, email, password);
 
     return res.status(200).json({
       errCode: userData.errCode,
       message: userData.errMessage,
       user: userData.user ? userData.user : {},
+      accessToken: userData.accessToken,
+      refreshToken: userData.refreshToken
     });
   } catch (e) {
     console.log(e);
@@ -95,10 +97,40 @@ let deleteUser = async (req, res) => {
   }
 };
 
+let requestRefreshToken = async (req, res) => {
+  try {
+    let user = await userService.requestRefreshToken(res, req.body);
+    return res.status(200).json(user);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+let logOut = async (req, res) => {
+  try {
+    let user = await userService.logOut(req, res);
+    return res.status(200).json(user);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+let getTokenLogin = async (req, res) => {
+  try {
+    let user = await userService.getTokenLogin(res, req.body);
+    return res.status(200).json(user);
+  } catch (e) {
+    console.log(e);
+  }
+}
+
 module.exports = {
   handleLogin: handleLogin,
   getAllUser: getAllUser,
   createUser: createUser,
   editUser: editUser,
   deleteUser: deleteUser,
+  requestRefreshToken: requestRefreshToken,
+  logOut: logOut,
+  getTokenLogin: getTokenLogin,
 };

@@ -21,6 +21,8 @@ import {
 } from "../../../service/bookService";
 import { ToastContainer, toast } from "react-toastify";
 import { getAllCategoryService } from "../../../service/categoryService";
+import { UserAuth } from "../../../Context/AuthProvider";
+import axiosJWT from "../../../axiosJWT";
 
 const { Option } = Select;
 
@@ -74,6 +76,8 @@ const UserManage = () => {
   const [isRender, setIsRender] = useState(false);
   const [previewImgURL, setPreviewImgURL] = useState("");
   const [form] = Form.useForm()
+  const { accessToken, refreshToken, setAccessToken, setRefreshToken } = UserAuth();
+  const axios = axiosJWT(accessToken, refreshToken, setAccessToken, setRefreshToken);
 
   const handleOnChangeImage = async (event) => {
     let data = event.target.files;
@@ -90,7 +94,7 @@ const UserManage = () => {
   useEffect(() => {
     const getBooks = async () => {
       try {
-        const res = await getAllBookService();
+        const res = await getAllBookService(accessToken, axios);
         setBooks(res.books);
       } catch (err) { }
     };
@@ -100,7 +104,7 @@ const UserManage = () => {
   useEffect(() => {
     const getCategories = async () => {
       try {
-        const res = await getAllCategoryService();
+        const res = await getAllCategoryService(accessToken, axios);
         setCategories(res.cats);
       } catch (err) { }
     };
@@ -147,7 +151,7 @@ const UserManage = () => {
         categoryId: Number(categoryId),
         amount: amount,
         image: image,
-      });
+      }, accessToken, axios);
       if (data.errCode === 0) {
         toast.success(data.message);
       } else {
@@ -162,7 +166,7 @@ const UserManage = () => {
         categoryId: Number(categoryId),
         amount: amount,
         image: image,
-      });
+      }, accessToken, axios);
       if (data.errCode === 0) {
         toast.success(data.message);
       } else {
@@ -187,7 +191,7 @@ const UserManage = () => {
   };
 
   const handleDelete = async (record) => {
-    const data = await deleteBookService(record.id);
+    const data = await deleteBookService(record.id, accessToken, axios);
     if (data.errCode === 0) {
       toast.success(data.message);
     } else {

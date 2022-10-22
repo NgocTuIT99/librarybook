@@ -3,6 +3,7 @@ import { Collapse, Typography } from "antd";
 import styled from "styled-components";
 import { getAllCategoryService } from "../../../service/categoryService";
 import { UserAuth } from "../../../Context/AuthProvider";
+import axiosJWT from "../../../axiosJWT";
 
 const { Panel } = Collapse;
 
@@ -27,17 +28,17 @@ const LinkStyled = styled(Typography.Link)`
 
 export default function CategoryList({ setSelectedCategory }) {
   const [categories, setCategories] = useState([]);
+  const { accessToken, refreshToken, setAccessToken, setRefreshToken } = UserAuth();
+  const axios = axiosJWT(accessToken, refreshToken, setAccessToken, setRefreshToken);
 
   useEffect(() => {
     const getCategories = async () => {
       try {
-        const res = await getAllCategoryService();
+        const res = await getAllCategoryService(accessToken, axios);
         setCategories(res.cats);
       } catch (err) { }
     };
-    return () => {
-      getCategories();
-    };
+    getCategories();
   }, [categories.length]);
 
   const handleClick = (value) => {
